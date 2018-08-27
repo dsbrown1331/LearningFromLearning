@@ -107,7 +107,7 @@ class ValueFunction:
         return -np.max(costs)
 
 
-def solve_mdp(env, valueFunction, reward_fn):
+def solve_mdp(env, valueFunction, reward_fn, max_time = 1000):
     """solve the mdp for a given reward function"""
     #rewards = []
 
@@ -119,21 +119,25 @@ def solve_mdp(env, valueFunction, reward_fn):
 
 
     for episode in range(0, episodes):
-        returns, states_visited, steps = run_episode(env, valueFunction, n, False, EPSILON, reward_fn)
-        if episode % 100 == 0:
+        #print(episode)
+        returns, states_visited, steps = run_episode(env, valueFunction, n, False, EPSILON, reward_fn, max_time = max_time)
+        if episode % 100 == 99:
             print(episode, returns, steps)
 
 
 
 
-def run_episode(env, valueFunction, n, render=False, epsilon = 0, reward_fn = None):
+def run_episode(env, valueFunction, n, render=False, epsilon = 0, reward_fn = None, get_actions = False, max_time = 1000):
     state = env.reset()
     #print("init state", state)
     states_visited = []
+    actions_taken = []
     # get initial action
     currentPosition = state[0]
     currentVelocity = state[1]
     currentAction = getAction(currentPosition, currentVelocity, valueFunction, epsilon)
+    states_visited.append(state)
+    actions_taken.append(currentAction)
 
     # track previous position, velocity, action and reward
     positions = [currentPosition]
@@ -160,7 +164,7 @@ def run_episode(env, valueFunction, n, render=False, epsilon = 0, reward_fn = No
             newVelocity = observation[1]
             # choose new action
             newAction = getAction(newPosition, newVelocity, valueFunction, epsilon)
-
+            actions_taken.append(newAction)
             # track new state and action
             positions.append(newPosition)
             velocities.append(newVelocity)
@@ -171,7 +175,7 @@ def run_episode(env, valueFunction, n, render=False, epsilon = 0, reward_fn = No
                 rewards.append(reward_fn.get_reward(observation))
                 #print("rewards", rewards)
 
-            if newPosition >= POSITION_MAX or time >= 1000:
+            if newPosition >= POSITION_MAX or time >= max_time:
                 T = time
 
         # get the time of the state to update
@@ -196,7 +200,10 @@ def run_episode(env, valueFunction, n, render=False, epsilon = 0, reward_fn = No
         currentAction = newAction
 
 
-    return sum(rewards), states_visited, time
+    if not get_actions:
+        return sum(rewards), states_visited, time
+    else:
+        return sum(rewards), states_visited, actions_taken, time
 
 def rollout(env, valueFunction, render=False):
     state = env.reset()

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 #rewards = []
 if __name__ == "__main__":
 
-    reps = 1000  #number of episodes to train learner on
+    reps = 500  #number of episodes to train learner on
 
     env = gym.make('MountainCar-v0')
     env.seed(1234)
