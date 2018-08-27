@@ -3,7 +3,8 @@
 Created on Mon Aug 13 12:32:59 2018
 
 Using an MDP solver/RL method, run the Syed and Schapire algorithm to optimize performance
-with respect to signs of features extracted
+with respect to signs of features extracted. I'm using the simpler algorithm
+described in "Apprenticeship Learning using Linear Programming"
 
 @author: dsbrown
 """
@@ -21,6 +22,7 @@ class MWAL:
         self.discount = discount
         self.alpha = alpha
         self.num_tilings = num_tilings
+        self.value_fns = []
 
         
 
@@ -34,18 +36,20 @@ class MWAL:
         for t in range(1,T+1):
             print("---- MWAL iteration : ", t)
             #normalize the W's 
-            W_norm = W / np.sum(W)
+            W = W / np.sum(W)
             #PRINT OUT W's
             print("weights")
             for i in range(k):
-                print(W_norm[i], end = ", ")
+                print(W[i], end = ", ")
             print()
+            print(np.sum(np.abs(W)))
             #compute an epsilon-optimal policy for the MDP
             #with R(s) = W_norm ^T \phi(s)
-            reward_fn = rbf.RbfReward(self.rbf_fn, W_norm, self.env)
+            reward_fn = rbf.RbfReward(self.rbf_fn, W, self.env)
 
             
             value_fn = ValueFunction(self.alpha, self.num_tilings)
+            self.value_fns.append(value_fn)
             print("solving mdp with sarsa semigrad")
             self.mdp_solver(self.env, value_fn, reward_fn)
                        
@@ -62,13 +66,9 @@ class MWAL:
     
             #update W values 
             #calculate tildeG
-            tildeG = [((1.0 - self.discount) * (fcounts_pi[i] - emp_f_counts[i]) + 2.0) / 4.0
-                    for i in range(len(fcounts_pi))]
-            print(tildeG)
-            #update W
-            for i in range(k):
-                W[i] = W[i] * np.exp(np.log(beta) * tildeG[i])
-        return value_fn
+            fcount_diffs = np.array(fcounts_pi - emp_f_counts)
+            W = W * (beta ** fcount_diffs)
+        return self.value_fns
            
            
             

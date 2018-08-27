@@ -1,0 +1,11 @@
++Group = "Grad"
++Project = "AI_ROBOTICS"
++ProjectDescription = "simulation of active reward learning using different variations of bayesian inverse reinforcement learning algorithm"
+universe = vanilla
+Executable = avoid_spill
+arguments = $(Process) 1
+Output = ./output/spill/random_$(Process).out 
+Log = ./log/spill/random_$(Process).log
+Error = ./log/spill/random_$(Process).err
+
+Queue 100

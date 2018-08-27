@@ -11,6 +11,7 @@ from feature_extrapolation import FeatureSignExtractor
 from maxent import MaxEnt
 import pickle
 import random
+import sys
 
 
 import matplotlib.pyplot as plt
@@ -21,21 +22,27 @@ import matplotlib.pyplot as plt
 #rewards = []
 if __name__ == "__main__":
 
-    #max ent parameter
-    learning_rate = 0.05
-    num_steps = 20
+    if len(sys.argv) < 3:
+        print("usage: python mcar_maxent_exp.py seed ndemos")
 
-    reps = 10  #number of episodes to train learner on
+    #max ent parameter
+    learning_rate = 0.01
+    num_steps = 5
+
+    percentage_skip = 0.8
+    seed = int(sys.argv[1])
+    reps = int(sys.argv[2])  #number of episodes to train learner on
     num_fcount_rollouts = 100
     eval_rollouts = 100
-    skip_time = 7 #number of episodes to skip when computing demo feature counts
-    mwal_iter = 100 #number of times to run MWAL
+    skip_time = int(np.floor(percentage_skip * reps)) #number of episodes to skip when computing demo feature counts
+    print(reps, skip_time)
+
     rbf_grid_size = 8
     assert(skip_time < reps)
 
     env = gym.make('MountainCar-v0')
-    env.seed(1234)
-    random.seed(12345)
+    env.seed(seed)
+    random.seed(seed)
 
     numOfTilings = 8
     alpha = 0.5
@@ -77,31 +84,18 @@ if __name__ == "__main__":
 #    plt.show()
 
 
-    writer = open("data/mountain_car_test_data_maxent.txt", "w")
-    demo_writer = open("data/mountain_car_demos_maxent.txt", "w")
-    fcount_writer = open("data/mountain_car_fcounts_maxent.txt", "w")
-    writer.write("#demos\n")
+    writer = open("data/mcar_maxent_seed" + str(seed) + "_demos" + str(reps), "w")
     for i in range(reps):
         print(">>>>iteration",i)
 
 
         reward, states_visited, steps = run_episode(env, valueFunction, n, False, EPSILON)
-        for s in states_visited:
-            demo_writer.write(str(s))
-            demo_writer.write("\n")
-        demo_writer.write("----\n")
         #compute feature counts
         fcounts = compute_feature_counts(fMap, states_visited, discount, env)
         print("steps = ", steps)
         #print("feature count = ", fcounts)
-        writer.write(str(reward) + "\n")
         features.append(fcounts)
-        for i in range(len(fcounts)-1):
-            fcount_writer.write(str(fcounts[i]) + ",")
-        fcount_writer.write(str(fcounts[-1]) + "\n")
-    demo_writer.close()
-    fcount_writer.close()
-
+        
     features = np.array(features)
 
     #compute expected feature counts for demos
@@ -110,16 +104,16 @@ if __name__ == "__main__":
     maxent_value_fn = ment.get_opt_policy(emp_feature_cnts, learning_rate, num_steps)
 
     #pickle the controller (value function)
-    with open('mcar_maxent_policy_ss.pickle', 'wb') as f:
-        pickle.dump(maxent_value_fn, f, pickle.HIGHEST_PROTOCOL)
+    #with open('mcar_maxent_policy_ss.pickle', 'wb') as f:
+    #    pickle.dump(maxent_value_fn, f, pickle.HIGHEST_PROTOCOL)
 
-    with open('mcar_maxent_policy_ss.pickle', 'rb') as f:
-        vFunc = pickle.load(f)
+    #with open('mcar_maxent_policy_ss.pickle', 'rb') as f:
+    #    vFunc = pickle.load(f)
 
     #evaluate maxent learned policy
     returns = evaluate_policy(env, eval_rollouts, maxent_value_fn)
     print("average return", np.mean(returns))
-    writer.write("#learned policy\n")
+    
     for r in returns:
         writer.write(str(r)+"\n")
     writer.close()
