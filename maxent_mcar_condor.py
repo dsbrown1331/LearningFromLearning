@@ -9,12 +9,12 @@ import argparse
 # If you need certain envrionment variables set for what you want to run it
 # sometimes helps to write a wrapper that exports the variables and then
 # runs the desired exectuable.
-EXECUTABLE = 'python mcar_maxent_exp.py'
+EXECUTABLE = 'mcar_maxent_exp'
 
 # I use TEST to make sure that the right jobs are being generated before
 # launching to condor. When TEST = True, the commands are just printed out.
 # It's one way to debug a condor_submit script.
-TEST = True
+TEST = False
 
 
 def submitToCondor(param, seed):
@@ -36,12 +36,14 @@ def submitToCondor(param, seed):
     # Creating submit file for condor
     # See https://www.cs.utexas.edu/facilities/documentation/condor for more
     # details.
-    submitFile = 'Executable = ' + EXECUTABLE + "\n"
-    submitFile += 'Error = /dev/null\n'
-    submitFile += 'Input = /dev/null\nOutput = /dev/null\n'
-    submitFile += 'Log = /dev/null\narguments = %s\n' % arguments
+    submitFile = 'Executable = ' + EXECUTABLE + ".py\n"
+    submitFile += 'Log = ./mcarlog/' + EXECUTABLE + "seed" + str(seed) + "param" + str(param) + '.log\n'
+    submitFile += 'Output = ./mcarlog/' + EXECUTABLE + str(seed) + "param" + str(param) + '.out\n'
+    submitFile += 'Error = ./mcarlog/' + EXECUTABLE + str(seed) + "param" + str(param) + '.err\n'
+    submitFile += 'arguments = %s\n' % arguments
     submitFile += '+Group = "GRAD"\n+Project = "AI_ROBOTICS"\n'
     submitFile += '+ProjectDescription = "Learning from demonstrations by learners"\n'
+    submitFile += 'universe = vanilla\n'
     submitFile += 'Queue'
 
     if TEST:

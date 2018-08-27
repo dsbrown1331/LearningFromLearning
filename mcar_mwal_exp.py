@@ -1,6 +1,4 @@
-#from mcar_sarsa_semigrad_TileSutton import ValueFunction, run_episode, getAction
-
-
+#!/usr/bin/env python
 from mcar_sarsa_semigrad_TileSutton import ValueFunction, run_episode, getOptimalAction, run_rollout, solve_mdp, evaluate_policy
 import gym
 import time
@@ -25,7 +23,7 @@ if __name__ == "__main__":
         print("usage: python mcar_maxent_exp.py seed ndemos")
 
     #mwal paramters 
-    mwal_iter = 5 #number of times to run MWAL
+    mwal_iter = 100 #number of times to run MWAL
     
 
     percentage_skip = 0.8

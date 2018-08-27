@@ -40,7 +40,7 @@ class MWAL:
             #PRINT OUT W's
             print("weights")
             for i in range(k):
-                print(W[i], end = ", ")
+                print(W[i],)
             print()
             print(np.sum(np.abs(W)))
             #compute an epsilon-optimal policy for the MDP
@@ -61,7 +61,7 @@ class MWAL:
             fcounts_pi = rbf.get_expected_feature_counts(self.num_rollouts, self.rbf_fn, value_fn, self.env, self.discount)
             print("expected f counts")            
             for f in fcounts_pi:
-                print(f, end = ", ")
+                print(f,)
             print()
     
             #update W values 

@@ -35,7 +35,7 @@ class MaxEnt:
             #PRINT OUT W's
             print("weights")
             for i in range(k):
-                print(W[i], end = ", ")
+                print(W[i],)
             print()
             #compute an epsilon-optimal policy for the MDP
             #with R(s) = W ^T \phi(s)
@@ -54,7 +54,7 @@ class MaxEnt:
             fcounts_pi = rbf.get_expected_feature_counts(self.num_rollouts, self.rbf_fn, value_fn, self.env, self.discount)
             print("expected f counts")
             for f in fcounts_pi:
-                print(f, end = ", ")
+                print(f,)
             print()
 
             #print size of the gradient

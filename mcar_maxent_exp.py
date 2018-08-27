@@ -1,6 +1,4 @@
-#from mcar_sarsa_semigrad_TileSutton import ValueFunction, run_episode, getAction
-
-
+#!/usr/bin/env python
 from mcar_sarsa_semigrad_TileSutton import ValueFunction, run_episode, getOptimalAction, run_rollout, solve_mdp, evaluate_policy
 import gym
 import time
@@ -27,7 +25,7 @@ if __name__ == "__main__":
 
     #max ent parameter
     learning_rate = 0.01
-    num_steps = 5
+    num_steps = 30
 
     percentage_skip = 0.8
     seed = int(sys.argv[1])

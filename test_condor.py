@@ -9,7 +9,7 @@ import argparse
 # If you need certain envrionment variables set for what you want to run it
 # sometimes helps to write a wrapper that exports the variables and then
 # runs the desired exectuable.
-EXECUTABLE = 'mcar_mwal_exp'
+EXECUTABLE = 'testing_condor2.py'
 
 # I use TEST to make sure that the right jobs are being generated before
 # launching to condor. When TEST = True, the commands are just printed out.
@@ -36,10 +36,10 @@ def submitToCondor(param, seed):
     # Creating submit file for condor
     # See https://www.cs.utexas.edu/facilities/documentation/condor for more
     # details.
-    submitFile = 'Executable = ' + EXECUTABLE + ".py\n"
-    submitFile += 'Log = ./mcarlog/' + EXECUTABLE + "seed" + str(seed) + "param" + str(param) + '.log\n'
-    submitFile += 'Output = ./mcarlog/' + EXECUTABLE + str(seed) + "param" + str(param) + '.out\n'
-    submitFile += 'Error = ./mcarlog/' + EXECUTABLE + str(seed) + "param" + str(param) + '.err\n'
+    submitFile = 'Executable = ' + EXECUTABLE + "\n"
+    submitFile += 'Log = ./mcarlog/test.log\n'
+    submitFile += 'Output = ./mcarlog/test.out\n'
+    submitFile += 'Error = ./mcarlog/test.err\n'
     submitFile += 'arguments = %s\n' % arguments
     submitFile += '+Group = "GRAD"\n+Project = "AI_ROBOTICS"\n'
     submitFile += '+ProjectDescription = "Learning from demonstrations by learners"\n'
@@ -48,7 +48,6 @@ def submitToCondor(param, seed):
 
     if TEST:
         print(EXECUTABLE, arguments)
-        print(submitFile)
     else:
         proc = subprocess.Popen('condor_submit', stdin=subprocess.PIPE)
         proc.stdin.write(submitFile)
@@ -68,7 +67,7 @@ def main():
     # TODO: params are the different conditions of your experiment.
     # For example, if you wanted to test different regularization levels on
     # a machine learnings problem you could choose a range of L2 coefficients
-    params = [5,10,20,30,40,50]
+    params = [5]
     ct = 0
 
     for param in params:
