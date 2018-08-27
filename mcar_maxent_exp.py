@@ -8,9 +8,10 @@ import numpy as np
 import rbf
 from rbf import RBF, normalize_obs, generate_grid_centers, Rbf_2D_Feature_Map, compute_feature_counts
 from feature_extrapolation import FeatureSignExtractor
-from mwal import MWAL
+from maxent import MaxEnt
 import pickle
 import random
+
 
 import matplotlib.pyplot as plt
 
@@ -19,6 +20,10 @@ import matplotlib.pyplot as plt
 
 #rewards = []
 if __name__ == "__main__":
+
+    #max ent parameter
+    learning_rate = 0.05
+    num_steps = 20
 
     reps = 10  #number of episodes to train learner on
     num_fcount_rollouts = 100
@@ -41,6 +46,9 @@ if __name__ == "__main__":
     EPSILON = 0
     discount = 0.999 #using high discount factor
 
+    ##Debugging with optimal demonstrator. Max Ent works like a charm!
+    #with open('opt_policy_ss.pickle', 'rb') as f:
+    #    valueFunction = pickle.load(f)
     valueFunction = ValueFunction(alpha, numOfTilings)
 
     ##feature map
@@ -69,9 +77,9 @@ if __name__ == "__main__":
 #    plt.show()
 
 
-    writer = open("data/mountain_car_test_data.txt", "w")
-    demo_writer = open("data/mountain_car_demos.txt", "w")
-    fcount_writer = open("data/mountain_car_fcounts.txt", "w")
+    writer = open("data/mountain_car_test_data_maxent.txt", "w")
+    demo_writer = open("data/mountain_car_demos_maxent.txt", "w")
+    fcount_writer = open("data/mountain_car_fcounts_maxent.txt", "w")
     writer.write("#demos\n")
     for i in range(reps):
         print(">>>>iteration",i)
@@ -96,39 +104,20 @@ if __name__ == "__main__":
 
     features = np.array(features)
 
-    flabels = [str(c) for c in centers]
-    sign_finder = FeatureSignExtractor(features, flabels)
-    slopes = sign_finder.estimate_signs()
-    fsigns = np.sign(slopes)
-
-    signedfMap = rbf.SignedRbf_2D_Feature_Map(rbfun, fsigns)
-#    for f in range(len(features[0])):
-#        plt.figure(f)
-#        plt.plot(range(1,reps+1), features[:,f])
-#        plt.legend([flabels[f]])
-#        plt.xlabel("Number of episodes")
-#        plt.ylabel("Feature Counts")
-#
-#
-    print("positive slopes")
-    for i,s in enumerate(slopes):
-        if s > 0:
-            print(flabels[i], s)
-#    plt.show()
     #compute expected feature counts for demos
     emp_feature_cnts = np.mean(features[skip_time:], axis = 0)
-    mwal = MWAL(solve_mdp, signedfMap, env, num_fcount_rollouts, discount)
-    mwal_value_fn = mwal.get_opt_policy(emp_feature_cnts, mwal_iter)
+    ment = MaxEnt(solve_mdp, fMap, env, num_fcount_rollouts, discount)
+    maxent_value_fn = ment.get_opt_policy(emp_feature_cnts, learning_rate, num_steps)
 
     #pickle the controller (value function)
-    with open('mcar_policy_ss.pickle', 'wb') as f:
-        pickle.dump(mwal_value_fn, f, pickle.HIGHEST_PROTOCOL)
+    with open('mcar_maxent_policy_ss.pickle', 'wb') as f:
+        pickle.dump(maxent_value_fn, f, pickle.HIGHEST_PROTOCOL)
 
-    with open('mcar_policy_ss.pickle', 'rb') as f:
+    with open('mcar_maxent_policy_ss.pickle', 'rb') as f:
         vFunc = pickle.load(f)
 
-    #evaluate mwal learned policy
-    returns = evaluate_policy(env, eval_rollouts, mwal_value_fn)
+    #evaluate maxent learned policy
+    returns = evaluate_policy(env, eval_rollouts, maxent_value_fn)
     print("average return", np.mean(returns))
     writer.write("#learned policy\n")
     for r in returns:

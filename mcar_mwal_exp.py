@@ -24,7 +24,7 @@ if __name__ == "__main__":
     num_fcount_rollouts = 100
     eval_rollouts = 100
     skip_time = 7 #number of episodes to skip when computing demo feature counts
-    mwal_iter = 100 #number of times to run MWAL
+    mwal_iter = 1 #number of times to run MWAL
     rbf_grid_size = 8
     assert(skip_time < reps)
 
@@ -121,10 +121,10 @@ if __name__ == "__main__":
     mwal_value_fn = mwal.get_opt_policy(emp_feature_cnts, mwal_iter)
 
     #pickle the controller (value function)
-    with open('mcar_policy_ss.pickle', 'wb') as f:
+    with open('mcar_mwal_policy_ss.pickle', 'wb') as f:
         pickle.dump(mwal_value_fn, f, pickle.HIGHEST_PROTOCOL)
 
-    with open('mcar_policy_ss.pickle', 'rb') as f:
+    with open('mcar_mwal_policy_ss.pickle', 'rb') as f:
         vFunc = pickle.load(f)
 
     #evaluate mwal learned policy

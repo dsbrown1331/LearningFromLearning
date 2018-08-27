@@ -41,13 +41,13 @@ def getAction(position, velocity, valueFunction, epsilon):
     for action in ACTIONS:
         values.append(valueFunction.value(position, velocity, action))
     return np.argmax(values)
-    
+
 def getOptimalAction(position, velocity, valueFunction):
     values = []
     for action in ACTIONS:
         values.append(valueFunction.value(position, velocity, action))
     return np.argmax(values)
-    
+
 # wrapper class for state action value function
 class ValueFunction:
     # In this example I use the tiling software instead of implementing standard tiling by myself
@@ -110,20 +110,20 @@ class ValueFunction:
 def solve_mdp(env, valueFunction, reward_fn):
     """solve the mdp for a given reward function"""
     #rewards = []
-    
+
     episodes = 500
     n = 1
     # use optimistic initial value, so it's ok to set epsilon to 0
     EPSILON = 0.0
-    
+
 
 
     for episode in range(0, episodes):
         returns, states_visited, steps = run_episode(env, valueFunction, n, False, EPSILON, reward_fn)
         if episode % 100 == 0:
             print(episode, returns, steps)
-    
-    
+
+
 
 
 def run_episode(env, valueFunction, n, render=False, epsilon = 0, reward_fn = None):
@@ -149,7 +149,7 @@ def run_episode(env, valueFunction, n, render=False, epsilon = 0, reward_fn = No
     while True:
         # go to next time step
         time += 1
-        if render: 
+        if render:
             env.render()
 
         if time < T:
@@ -171,7 +171,7 @@ def run_episode(env, valueFunction, n, render=False, epsilon = 0, reward_fn = No
                 rewards.append(reward_fn.get_reward(observation))
                 #print("rewards", rewards)
 
-            if newPosition >= POSITION_MAX or time >= 2000:
+            if newPosition >= POSITION_MAX or time >= 1000:
                 T = time
 
         # get the time of the state to update
@@ -195,22 +195,24 @@ def run_episode(env, valueFunction, n, render=False, epsilon = 0, reward_fn = No
         currentVelocity = newVelocity
         currentAction = newAction
 
-    
+
     return sum(rewards), states_visited, time
-    
+
 def rollout(env, valueFunction, render=False):
     state = env.reset()
     epsilon = 0.0
     #print("init state", state)
-   
+
     # get initial action
     currentPosition = state[0]
     currentVelocity = state[1]
     currentAction = getAction(currentPosition, currentVelocity, valueFunction, epsilon)
     cum_reward = 0
     states_visited = []
+    time = 0
     while True:
-        if render: 
+        time += 1
+        if render:
             env.render()
             #print(currentAction)
             timer.sleep(0.01)
@@ -224,7 +226,7 @@ def rollout(env, valueFunction, render=False):
         newPosition = observation[0]
         newVelocity = observation[1]
 
-        if done:
+        if newPosition >= POSITION_MAX or time >= 1000:
             return cum_reward, states_visited #can be used for extended demos and can post process features of interest
 
 
@@ -233,19 +235,19 @@ def rollout(env, valueFunction, render=False):
 
 
         currentAction = newAction
-    
+
 def run_rollout(env, start_state, init_action, valueFunction, render=False):
     env.reset()
     state = env.set_start_state(start_state)
     epsilon = 0.0
     #print("init state", state)
-   
+
     # get initial action
     currentAction = init_action
     cum_reward = 0
     states_visited = []
     while True:
-        if render: 
+        if render:
             env.render()
             #print(currentAction)
             timer.sleep(0.01)
@@ -272,15 +274,15 @@ def run_rollout(env, start_state, init_action, valueFunction, render=False):
 
 def evaluate_policy(env, num_rollouts, vFunc):
     returns = []
-    
+
     for i in range(num_rollouts):
         cum_reward, states_visited = rollout(env, vFunc, False)
         #print("return", cum_reward)
         returns.append(cum_reward)
     return returns
-    
 
-    
+
+
 if __name__ == "__main__":
     #from gym import wrappers
     env = gym.make('MountainCar-v0')
@@ -296,7 +298,7 @@ if __name__ == "__main__":
     centers = rbf.generate_grid_centers(nrbf_tiling);
     print(centers)
     widths = 0.1*np.ones(len(centers))
-    
+
     rbfun = rbf.RBF(centers, widths, env.action_space.n)
     fMap = rbf.Rbf_2D_Feature_Map(rbfun)
     reward_fn = rbf.RbfReward(fMap, np.array([-1./len(centers) for _ in centers]), env)
@@ -312,7 +314,7 @@ if __name__ == "__main__":
     #pickle the controller (value function)
     #with open('mcar_policy.pickle', 'wb') as f:
     #    pickle.dump(valueFunction, f, pickle.HIGHEST_PROTOCOL)
-        
+
     #with open('mcar_policy.pickle', 'rb') as f:
     #    vFunc = pickle.load(f)
 
