@@ -82,36 +82,14 @@ if __name__ == "__main__":
 #    plt.show()
 
 
-    writer = open("data/mcar_maxent_soft_seed" + str(seed) + "_demos" + str(reps), "w")
+    writer = open("data/mcar_demo_seed" + str(seed) + "_demos" + str(reps), "w")
     for i in range(reps):
         print(">>>>iteration",i)
 
 
         reward, states_visited, steps = run_episode(env, valueFunction, n, False, EPSILON)
         #compute feature counts
-        fcounts = compute_feature_counts(fMap, states_visited, discount, env)
+        writer.write(str(reward) + "\n")
         print("steps = ", steps)
         #print("feature count = ", fcounts)
-        features.append(fcounts)
-
-    features = np.array(features)
-
-    #compute expected feature counts for demos
-    emp_feature_cnts = np.mean(features[skip_time:], axis = 0)
-    ment = MaxEnt(solve_mdp, fMap, env, num_fcount_rollouts, discount)
-    maxent_value_fn = ment.get_opt_policy(emp_feature_cnts, learning_rate, num_steps)
-
-    #pickle the controller (value function)
-    #with open('mcar_maxent_policy_ss.pickle', 'wb') as f:
-    #    pickle.dump(maxent_value_fn, f, pickle.HIGHEST_PROTOCOL)
-
-    #with open('mcar_maxent_policy_ss.pickle', 'rb') as f:
-    #    vFunc = pickle.load(f)
-
-    #evaluate maxent learned policy
-    returns = evaluate_softmax_policy(env, eval_rollouts, maxent_value_fn)
-    print("average return", np.mean(returns))
-
-    for r in returns:
-        writer.write(str(r)+"\n")
     writer.close()
