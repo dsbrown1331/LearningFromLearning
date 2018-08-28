@@ -9,7 +9,7 @@ Using an MDP solver/RL method, run the Maximum Entropy algorithm
 
 import numpy as np
 import rbf
-from mcar_sarsa_semigrad_TileSutton import ValueFunction, rollout, evaluate_policy
+from mcar_sarsa_semigrad_TileSutton import ValueFunction, rollout
 import math
 
 class MaxEnt:
@@ -44,14 +44,14 @@ class MaxEnt:
 
             value_fn = ValueFunction(self.alpha, self.num_tilings)
             print("solving mdp with sarsa semigrad")
-            self.mdp_solver(self.env, value_fn, reward_fn)
-            #TODO needs to be a stochastic policy!
+            self.mdp_solver(self.env, value_fn, reward_fn, max_time = 500)
+
             #debug watch policy
             #evaluate_policy(self.env, 4, value_fn)
 
 
             #compute an epsilon-good estimate of expected feature counts
-            fcounts_pi = rbf.get_expected_feature_counts(self.num_rollouts, self.rbf_fn, value_fn, self.env, self.discount)
+            fcounts_pi = rbf.get_expected_feature_counts_softmax(self.num_rollouts, self.rbf_fn, value_fn, self.env, self.discount)
             print("expected f counts")
             for f in fcounts_pi:
                 print(f,)

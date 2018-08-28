@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from mcar_sarsa_semigrad_TileSutton import ValueFunction, run_episode, getOptimalAction, run_rollout, solve_mdp, evaluate_policy
+from mcar_sarsa_semigrad_TileSutton import ValueFunction, run_episode, getOptimalAction, run_rollout, solve_mdp, evaluate_softmax_policy
 import gym
 import time
 import numpy as np
@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     #max ent parameter
     learning_rate = 0.01
-    num_steps = 30
+    num_steps = 50
 
     percentage_skip = 0.8
     seed = int(sys.argv[1])
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 #                        [0.75, 0.0], [0.75, 0.25], [0.75, 0.5], [0.75, 0.75], [0.75, 1.0],
 #                        [1.0, 0.0], [1.0, 0.25], [1.0, 0.5], [1.0, 0.75], [1.0, 1.0]])
     centers = generate_grid_centers(rbf_grid_size);
-    print(centers)
+    #print(centers)
     widths = 0.15*np.ones(len(centers))
 
     rbfun = RBF(centers, widths, env.action_space.n)
@@ -93,7 +93,7 @@ if __name__ == "__main__":
         print("steps = ", steps)
         #print("feature count = ", fcounts)
         features.append(fcounts)
-        
+
     features = np.array(features)
 
     #compute expected feature counts for demos
@@ -109,9 +109,9 @@ if __name__ == "__main__":
     #    vFunc = pickle.load(f)
 
     #evaluate maxent learned policy
-    returns = evaluate_policy(env, eval_rollouts, maxent_value_fn)
+    returns = evaluate_softmax_policy(env, eval_rollouts, maxent_value_fn)
     print("average return", np.mean(returns))
-    
+
     for r in returns:
         writer.write(str(r)+"\n")
     writer.close()

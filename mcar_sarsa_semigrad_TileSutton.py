@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 import pickle
 import rbf
 import time as timer
+import numpy as np
+
 
 ##Trying to merge with suttons code
 
@@ -33,6 +35,11 @@ ACTION_FORWARD = 2
 # order is important
 ACTIONS = [ACTION_REVERSE, ACTION_ZERO, ACTION_FORWARD]
 
+def softmax(x):
+    """Compute softmax values for each sets of scores in x."""
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum()
+
 # get action at @position and @velocity based on epsilon greedy policy and @valueFunction
 def getAction(position, velocity, valueFunction, epsilon):
     if np.random.rand() < epsilon:
@@ -41,6 +48,11 @@ def getAction(position, velocity, valueFunction, epsilon):
     for action in ACTIONS:
         values.append(valueFunction.value(position, velocity, action))
     return np.argmax(values)
+
+def getSoftmaxAction(position, velocity, valueFunction, num_actions):
+    p = softmax([valueFunction.value(position, velocity, a) for a in range(num_actions)])
+    return np.random.choice(num_actions, p=p)
+
 
 def getOptimalAction(position, velocity, valueFunction):
     values = []
@@ -111,10 +123,10 @@ def solve_mdp(env, valueFunction, reward_fn, max_time = 1000):
     """solve the mdp for a given reward function"""
     #rewards = []
 
-    episodes = 500
+    episodes = 600
     n = 1
     # use optimistic initial value, so it's ok to set epsilon to 0
-    EPSILON = 0.0
+    EPSILON = 0.05
 
 
 
@@ -243,6 +255,45 @@ def rollout(env, valueFunction, render=False):
 
         currentAction = newAction
 
+def rollout_softmax(env, valueFunction, render=False):
+    state = env.reset()
+    n_actions = env.action_space.n
+    epsilon = 0.0
+    #print("init state", state)
+
+    # get initial action
+    currentPosition = state[0]
+    currentVelocity = state[1]
+    currentAction = getSoftmaxAction(currentPosition, currentVelocity, valueFunction, n_actions)
+    cum_reward = 0
+    states_visited = []
+    time = 0
+    while True:
+        time += 1
+        if render:
+            env.render()
+            #print(currentAction)
+            timer.sleep(0.01)
+
+
+        # take current action and go to the new state
+        observation, reward, done, info = env.step(currentAction)
+        cum_reward += reward
+        #save observations for post-processing
+        states_visited.append(observation)
+        newPosition = observation[0]
+        newVelocity = observation[1]
+
+        if newPosition >= POSITION_MAX or time >= 1000:
+            return cum_reward, states_visited #can be used for extended demos and can post process features of interest
+
+
+        # choose new action
+        newAction = getSoftmaxAction(newPosition, newVelocity, valueFunction, n_actions)
+
+
+        currentAction = newAction
+
 def run_rollout(env, start_state, init_action, valueFunction, render=False):
     env.reset()
     state = env.set_start_state(start_state)
@@ -284,6 +335,15 @@ def evaluate_policy(env, num_rollouts, vFunc):
 
     for i in range(num_rollouts):
         cum_reward, states_visited = rollout(env, vFunc, False)
+        #print("return", cum_reward)
+        returns.append(cum_reward)
+    return returns
+
+def evaluate_softmax_policy(env, num_rollouts, vFunc):
+    returns = []
+
+    for i in range(num_rollouts):
+        cum_reward, states_visited = rollout_softmax(env, vFunc, False)
         #print("return", cum_reward)
         returns.append(cum_reward)
     return returns
