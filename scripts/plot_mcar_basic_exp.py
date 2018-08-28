@@ -40,11 +40,22 @@ for demos in demonstrations:
         for line in reader:
             birl_returns.append(float(line)) 
     birl.append(-np.mean(birl_returns))
+    
+#plot MaxEnt
+maxent = []
+for demos in demonstrations:
+    maxent_returns = []
+    for seed in range(num_reps):
+        reader = open("data/mcar_maxent_seed" + str(seed) + "_demos" + str(demos))
+        for line in reader:
+            maxent_returns.append(float(line)) 
+    maxent.append(-np.mean(maxent_returns))
 
   
 
 plt.plot(demonstrations, mwal, label="GT-IRLfL", lw=3)
 plt.plot(demonstrations, birl, label="BIRL", lw=3)
+plt.plot(demonstrations, maxent, label="MaxEnt", lw=3)
 plt.plot(range(5,max_demos + 1), demo_returns, label="demonstrations", lw=3)  
 plt.xlabel("Number of demonstrations",fontsize=18)
 plt.ylabel("Average steps to goal",fontsize=18)
