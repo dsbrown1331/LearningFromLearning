@@ -25,8 +25,8 @@ if __name__ == "__main__":
 
     #birl parameters
     confidence = 1.0
-    num_steps = 100
-    step_size = 0.05
+    num_steps = 200  #100
+    step_size = 0.03  #0.05
     time_limit = 200
 
     percentage_skip = 0.8
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 #                        [1.0, 0.0], [1.0, 0.25], [1.0, 0.5], [1.0, 0.75], [1.0, 1.0]])
     centers = generate_grid_centers(rbf_grid_size);
     num_features = len(centers)
-    
+
     widths = 0.15*np.ones(len(centers))
 
     rbfun = RBF(centers, widths, env.action_space.n)
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
 
     demos = []
-    writer = open("data/mcar_birl_conf" +str(confidence) + "_seed" + str(seed) + "_demos" + str(reps), "w")
+    writer = open("data/mcar_birl_steps" + str(num_steps) + "_size" + str(step_size) + "_conf" +str(confidence) + "_seed" + str(seed) + "_demos" + str(reps), "w")
     for i in range(reps):
         print(">>>>iteration",i)
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     #evaluate maxent learned policy
     returns = evaluate_policy(env, eval_rollouts, birl_value_fn)
     print("average return", np.mean(returns))
-    
+
     for r in returns:
         writer.write(str(r)+"\n")
     writer.close()
