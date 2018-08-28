@@ -31,16 +31,7 @@ for demos in demonstrations:
             mwal_returns.append(float(line)) 
     mwal.append(-np.mean(mwal_returns))
 
-#plot BIRL
-birl = []
-for demos in demonstrations:
-    birl_returns = []
-    for seed in range(num_reps):
-        reader = open("data/mcar_birl_conf" + str(birl_conf) + "_seed" + str(seed) + "_demos" + str(demos))
-        for line in reader:
-            birl_returns.append(float(line)) 
-    birl.append(-np.mean(birl_returns))
-    
+   
 #plot MaxEnt
 maxent = []
 for demos in demonstrations:
@@ -50,6 +41,16 @@ for demos in demonstrations:
         for line in reader:
             maxent_returns.append(float(line)) 
     maxent.append(-np.mean(maxent_returns))
+    
+#plot BIRL
+birl = []
+for demos in demonstrations:
+    birl_returns = []
+    for seed in range(num_reps):
+        reader = open("data/mcar_birl_conf" + str(birl_conf) + "_seed" + str(seed) + "_demos" + str(demos))
+        for line in reader:
+            birl_returns.append(float(line)) 
+    birl.append(-np.mean(birl_returns))
 
   
 
