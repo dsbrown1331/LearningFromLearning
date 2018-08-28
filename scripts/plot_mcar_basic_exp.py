@@ -8,7 +8,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 demonstrations = [5,10,20,30,40,50]
 num_reps = 20
+max_demos = 50
 birl_conf = 1.0
+
+#plot demos
+demo_returns = np.zeros((num_reps,max_demos))
+for seed in range(num_reps):
+    reader = open("data/mcar_demo_seed" + str(seed) + "_demos50")
+    cnt = 0
+    for line in reader:
+        demo_returns[seed, cnt] = float(line)
+        cnt += 1
+demo_returns = -np.mean(demo_returns[:,4:], axis = 0)
+
 #plot MWAL
 mwal = []
 for demos in demonstrations:
@@ -33,6 +45,7 @@ for demos in demonstrations:
 
 plt.plot(demonstrations, mwal, label="GT-IRLfL", lw=3)
 plt.plot(demonstrations, birl, label="BIRL", lw=3)
+plt.plot(range(5,max_demos + 1), demo_returns, label="demonstrations", lw=3)  
 plt.xlabel("Number of demonstrations",fontsize=18)
 plt.ylabel("Average steps to goal",fontsize=18)
 plt.xticks(demonstrations,fontsize=18) 
